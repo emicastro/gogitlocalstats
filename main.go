@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/user"
 	"strings"
 )
 
@@ -65,6 +66,19 @@ func scanGitFolders(folders []string, folder string) []string {
 // living in the `folder` subtree
 func recursiveScanFolder(folder string) []string {
 	return scanGitFolders(make([]string, 0), folder)
+}
+
+// getDotFilePath returns the dot file for the repos list.
+// Creates it and the enclosing folder if it does not exist.
+func getDotFilePath() string {
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dotFile := usr.HomeDir + "/.gogitlocalstats"
+
+	return dotFile
 }
 
 // stats generates a niche graph of git contributions
