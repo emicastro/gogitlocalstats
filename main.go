@@ -2,11 +2,6 @@ package main
 
 import "flag"
 
-// stats generates a niche graph of git contributions
-func stats(email string) {
-	print("stats")
-}
-
 func main() {
 	var folder string
 	var email string
