@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
@@ -79,6 +82,79 @@ func getDotFilePath() string {
 	dotFile := usr.HomeDir + "/.gogitlocalstats"
 
 	return dotFile
+}
+
+// addNewSliceElementsToFile given a slice of strings representing paths,
+// stores them to the filesystem
+func addNewSliceElementsToFile(filePath string, newRepos []string) {
+	existingRepos := parseFileLinesToSlice(filePath)
+	repos := joinSlices(newRepos, existingRepos)
+	dumpStringsSliceToFiles(repos, filePath)
+}
+
+// parseFileLinesToSlice given a file path string, gets the content
+// of each line and parses it to a slice of strings.
+func parseFileLinesToSlice(filePath string) []string {
+	f := openFile(filePath)
+	defer f.Close()
+
+	var lines []string
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		if err != io.EOF {
+			panic(err)
+		}
+	}
+	return lines
+}
+
+// openFile given a file path string opens the file and returns it.
+func openFile(filePath string) *os.File {
+	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY, 0755)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// file does not exist
+			_, err := os.Create(filePath)
+			if err != nil {
+				panic(err)
+			}
+		} else {
+			// other error
+			panic(err)
+		}
+	}
+
+	return f
+}
+
+// joinSlices adds the element of the `new` slice into the `existing` slice
+// only if it is not already there.
+func joinSlices(new []string, existing []string) []string {
+	for _, i := range new {
+		if !sliceContains(existing, i) {
+			existing = append(existing, i)
+		}
+	}
+	return existing
+}
+
+// sliceContains returns true if `slice` contains `value`
+func sliceContains(slice []string, value string) bool {
+	for _, v := range slice {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}
+
+// dumpStringSliceToFile writes content to the file in path `filePath` (overwriting existing content)
+func dumpStringSliceToFile(repos []string, filePath string) {
+	content := strings.Join(repos, "\n")
+	ioutil.WriteFile(filePath, []byte(content), 0755)
 }
 
 // stats generates a niche graph of git contributions
