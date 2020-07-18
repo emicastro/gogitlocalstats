@@ -1,6 +1,8 @@
 package main
 
-import "flag"
+import (
+	"flag"
+)
 
 func main() {
 	var folder string
