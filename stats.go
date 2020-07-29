@@ -10,7 +10,7 @@ import (
 )
 
 const outOfRange = 99999
-const daysInLastSixMoths = 183
+const daysInLastSixMonths = 183
 const weeksInLastSixMonths = 26
 
 type column []int
@@ -18,6 +18,7 @@ type column []int
 // stats calculates and prints the stats.
 func stats(email string) {
 	commits := processRepositories(email)
+	// TODO: Bugfixing
 	printCommitStats(commits)
 }
 
@@ -26,7 +27,7 @@ func stats(email string) {
 func processRepositories(email string) map[int]int {
 	filePath := getDotFilePath()
 	repos := parseFileLinesToSlice(filePath)
-	daysInMap := daysInLastSixMoths
+	daysInMap := daysInLastSixMonths
 
 	commits := make(map[int]int, daysInMap)
 	for i := daysInMap; i > 0; i-- {
@@ -49,6 +50,7 @@ func fillCommits(email string, path string, commits map[int]int) map[int]int {
 		panic(err)
 	}
 	//get the HEAD reference
+	fmt.Printf("%s", repo)
 	ref, err := repo.Head()
 	if err != nil {
 		panic(err)
@@ -94,7 +96,7 @@ func countDaysSinceDate(date time.Time) int {
 	for date.Before(now) {
 		date = date.Add(time.Hour * 24)
 		days++
-		if days > daysInLastSixMoths {
+		if days > daysInLastSixMonths {
 			return outOfRange
 		}
 	}
@@ -198,7 +200,7 @@ func printCells(cols map[int]column) {
 // printMonths prints the month names in the first line,
 // determining when the month changed between switching weeks
 func printMonths() {
-	week := getBeginningOfDay(time.Now()).Add(-(daysInLastSixMoths * time.Hour * 24))
+	week := getBeginningOfDay(time.Now()).Add(-(daysInLastSixMonths * time.Hour * 24))
 	month := week.Month()
 	fmt.Printf("         ")
 	for {
